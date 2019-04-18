@@ -1,0 +1,43 @@
+---
+workspaces:
+    - name: prod
+      account_id: 12345678
+      regions:
+          - us-east-1
+          - us-west-2
+    - name: staging
+      account_id: 12345678
+      regions:
+          - us-west-2
+    - name: default
+      account_id: 12345678
+      regions:
+          - us-west-2
+
+
+# TODO: Add support for creating provider and remote state
+backend:
+    bucket: cs-comet-test-state
+    key: "{{job_name}}/{{region}}"
+    region: "us-west-2"
+    role_arn: "arn:aws:iam::{{account_id}}:role/terraform"
+
+jobs:
+  - name: app
+    # TODO: Add ability to include other directories as dependencies
+    source: app
+    # Depends on can be any value you decide, it is a way to identify jobs have a common dependency. 
+    # If you have a job that depends on an external module you can give it a name such as modules-null-label
+    # running comet -d modules-null-label will trigger every job that has the value in it's depends on list.
+    depends_on:
+        - users
+        - modules-null-label
+  - name: users
+    source: users
+    depends_on:
+        - app
+  - name: website
+    source: website
+    depends_on:
+        - modules-null-label
+
