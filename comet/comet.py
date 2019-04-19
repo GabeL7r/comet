@@ -3,11 +3,11 @@
 import click
 import json
 import os
-import parallel
+from .config import Config
+from .parallel import execute
 import logging
 import multiprocessing
 import sys
-from config import Config
 
 
 @click.group()
@@ -37,7 +37,7 @@ from config import Config
               help='Filter workspaces using regex.')
 @click.option('-v', is_flag=True, help="Enable debug logging")
 @click.pass_context
-def comet(
+def cli(
         ctx,
         config_file,
         debug,
@@ -64,7 +64,7 @@ def comet(
     ctx.obj['TF_JOBS'] = config.get_terraform_jobs()
 
 
-@comet.command()
+@cli.command()
 @click.option(
     '--apply-args',
     default=None,
@@ -80,7 +80,7 @@ def apply(ctx, apply_args):
     )
 
 
-@comet.command()
+@cli.command()
 @click.option(
     '--plan-args',
     default=None,
@@ -88,19 +88,18 @@ def apply(ctx, apply_args):
 @click.pass_context
 def plan(ctx, plan_args):
     """Run terraform plan."""
-    parallel.execute(
+    execute(
         ctx.obj['TF_JOBS'],
         'plan',
         plan_args
     )
 
 
-@comet.command()
+@cli.command()
 @click.pass_context
 def destroy(ctx):
     """Run terraform destroy."""
-    # TODO: add polymorphism to handle this
-    parallel.execute(
+    execute(
         ctx.obj['TF_JOBS'],
         'destroy',
         None
@@ -108,7 +107,7 @@ def destroy(ctx):
     )
 
 
-@comet.command()
+@cli.command()
 @click.option(
     '--init-args',
     default=None,
@@ -116,7 +115,7 @@ def destroy(ctx):
 @click.pass_context
 def init(ctx, init_args):
     """Run terraform init."""
-    parallel.execute(
+    execute(
         ctx.obj['TF_JOBS'],
         'init',
         init_args

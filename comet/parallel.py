@@ -1,7 +1,7 @@
 from multiprocessing import Pool
 from functools import partial
 import multiprocessing
-from terraform import T
+from .terraform import T
 import os
 import re
 

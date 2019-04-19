@@ -4,8 +4,13 @@ setup:
 lint:
 	autopep8 --in-place --aggressive --aggressive *.py
 
-deploy:
+bundle:
 	python setup.py sdist bdist_wheel
+
+clean: 
+	rm -rf dist
+
+deploy: clean bundle
 	twine check dist/*
 	twine upload dist/*
 
